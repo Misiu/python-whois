@@ -5,6 +5,7 @@ import sys
 import os
 import subprocess
 import socket
+from typing import Any, List, Optional, Pattern
 from .parser import WhoisEntry
 from .whois import NICClient
 import logging
@@ -18,12 +19,21 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 # thanks to https://www.regextester.com/104038
-IPV4_OR_V6 = re.compile(
+IPV4_OR_V6: Pattern[str] = re.compile(
     r"((^\s*((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\s*$)|(^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$))"  # noqa: E501
 )
 
 
-def whois(url, command=False, flags=0, executable="whois", executable_opts=None, inc_raw=False, quiet=False, convert_punycode=True):
+def whois(
+        url:str,
+        command:bool=False,
+        flags: int=0,
+        executable: str="whois",
+        executable_opts: Optional[List[str]]=None,
+        inc_raw: bool=False,
+        quiet: bool=False,
+        convert_punycode: bool=True
+        ):
     # clean domain to expose netloc
     ip_match = IPV4_OR_V6.match(url)
     if ip_match:
@@ -62,7 +72,7 @@ def whois(url, command=False, flags=0, executable="whois", executable_opts=None,
 suffixes = None
 
 
-def extract_domain(url):
+def extract_domain(url: str) -> str:
     """Extract the domain from the given URL
 
     >>> logger.info(extract_domain('http://www.google.com.au/tos.html'))
