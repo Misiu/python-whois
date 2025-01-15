@@ -392,6 +392,8 @@ class WhoisEntry(dict):
             return WhoisEdu(domain, text)
         elif domain.endswith(".lv"):
             return WhoisLv(domain, text)
+        elif domain.endswith(".co"):
+            return WhoisCo(domain, text)
         else:
             return WhoisEntry(domain, text)
 
@@ -728,7 +730,7 @@ class WhoisUs(WhoisEntry):
     }
 
     def __init__(self, domain, text):
-        if "Not found:" in text:
+        if "No Data Found" in text:
             raise PywhoisError(text)
         else:
             WhoisEntry.__init__(self, domain, text, self.regex)
@@ -1104,7 +1106,7 @@ class WhoisBr(WhoisEntry):
         "admin_c": r"admin-c: *(.+)",
         "tech_c": r"tech-c: *(.+)",
         "billing_c": r"billing-c: *(.+)",
-        "name_server": r"nserver: *(.+)",
+        "name_servers": r"nserver: *(.+)",
         "nsstat": r"nsstat: *(.+)",
         "nslastaa": r"nslastaa: *(.+)",
         "saci": r"saci: *(.+)",
@@ -1303,7 +1305,7 @@ class WhoisInfo(WhoisEntry):
     }
 
     def __init__(self, domain, text):
-        if text.strip() == "NOT FOUND":
+        if "Domain not found" in text:
             raise PywhoisError(text)
         else:
             WhoisEntry.__init__(self, domain, text, self.regex)
@@ -3426,6 +3428,15 @@ class WhoisLv(WhoisEntry):
 
     def __init__(self, domain, text):
         if "Status: free" in text:
+            raise PywhoisError(text)
+        else:
+            WhoisEntry.__init__(self, domain, text, self.regex)
+
+class WhoisCo(WhoisEntry):
+    """Whois parser for .co domains"""
+
+    def __init__(self, domain, text):
+        if "No Data Found" in text:
             raise PywhoisError(text)
         else:
             WhoisEntry.__init__(self, domain, text, self.regex)
